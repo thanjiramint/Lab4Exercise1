@@ -3,6 +3,7 @@ package th.ac.tu.siit.its333.lab4exercise1;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.widget.AdapterView;
 
 public class CourseDBHelper extends SQLiteOpenHelper {
 

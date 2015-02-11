@@ -10,6 +10,8 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ListView;
+import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 
 
@@ -22,14 +24,32 @@ public class MainActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+           helper = new CourseDBHelper(this);
+
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
+        @Override
+        protected void onResume() {
+            super.onResume();
 
-        // This method is called when this activity is put foreground.
+            // This method is called when this activity is put foreground.
 
+            SQLiteDatabase db = helper.getReadableDatabase();
+            Cursor cursor = db.rawQuery("SELECT SUM(Credit) TotalCredit, SUM(Credit*Value) TGP FROM course;", null);
+            cursor.moveToFirst(); // get the first row
+            double totalCredit = cursor.getInt(0); // get the first column
+            int tgp = cursor.getInt(1);
+
+            Log.d("course","Totalcredit is "+ totalCredit+"");
+            Log.d("course","Totalvalue is "+ tgp+"");
+
+        TextView tv = (TextView)findViewById(R.id.tvGPA);
+        TextView tv1 = (TextView)findViewById(R.id.tvGP);
+        TextView tv2 = (TextView)findViewById(R.id.tvCR);
+
+        tv1.setText(Integer.toString(tgp));
+        tv2.setText(Double.toString(totalCredit));
+        tv.setText(Double.toString(tgp/totalCredit));
     }
 
     public void buttonClicked(View v) {
@@ -49,6 +69,10 @@ public class MainActivity extends ActionBarActivity {
 
             case R.id.btReset:
 
+                SQLiteDatabase db = helper.getWritableDatabase();
+                int n_rows = db.delete("course","", null);
+                onResume();
+
                 break;
         }
     }
@@ -61,6 +85,16 @@ public class MainActivity extends ActionBarActivity {
                 int credit = data.getIntExtra("credit", 0);
                 String grade = data.getStringExtra("grade");
 
+                SQLiteDatabase db = helper.getWritableDatabase();
+                ContentValues r = new ContentValues();
+                r.put("code", code);
+                r.put("credit", credit);
+                r.put("grade", grade);
+                r.put("value", gradeToValue(grade));
+                long new_id = db.insert("course", null, r);
+
+                Log.d("course", new_id+"");
+                Log.d("value", gradeToValue(grade)+"");
             }
         }
 
